@@ -1,0 +1,9 @@
+{application, eid, [
+    {id, "eid"},
+    {vsn, "0.1.0"},
+    {modules, []},
+    {registered, [eid_sup, eid_server]},
+    {applications, [kernel, stdlib]},
+    {mod, {eid_app, []}},
+    {env, []}
+]}.

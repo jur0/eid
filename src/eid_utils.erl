@@ -5,7 +5,7 @@
 
 %% API
 
-%% Returns UNIX timestamp in milliseconds as an integer number.
+%% Returns UNIX time stamp in milliseconds as an integer number.
 -spec time_millis() -> pos_integer().
 time_millis() ->
     {MegaSecs, Secs, MicroSecs} = os:timestamp(),

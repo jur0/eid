@@ -22,17 +22,17 @@
 
 %% API
 
-%% Starts the gen_server.
+%% @doc Starts the gen_server. It stores the last time stamp in its state.
 -spec start_link() -> {'ok', pid()} | 'ignore' | {'error', term()}.
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
-%% Stops the gen_server.
+%% @doc Stops the gen_server.
 -spec stop() -> 'stopped'.
 stop() ->
     gen_server:call(?SERVER, stop).
 
-%% Returns either binary or integer unique id.
+%% @doc Returns either binary or integer unique id.
 -spec get('int' | 'bin') -> int_id() | bin_id().
 get(Type) ->
     gen_server:call(?SERVER, {get, Type}).

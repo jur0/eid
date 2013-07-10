@@ -14,23 +14,34 @@
 -export([int_id/1]).
 -export([bin_id/1]).
 -export([sequence_int_id/1]).
+-export([sequence_max_int_id/1]).
 -export([sequence_bin_id/1]).
+-export([sequence_max_bin_id/1]).
+
+%% NOTE: this must be the same as in eid_server!
+-define(MAX_SEQ, 65535).
 
 all() ->
     [
         {group, normal_id},
         {group, sequence_int_id},
-        {group, sequence_bin_id}
+        {group, sequence_max_int_id},
+        {group, sequence_bin_id},
+        {group, sequence_max_bin_id}
     ].
 
 groups() ->
     NormalIdTests = [int_id, bin_id],
     SequenceIntIdTests = [sequence_int_id],
+    SequenceMaxIntIdTests = [sequence_max_int_id],
     SequenceBinIdTests = [sequence_bin_id],
+    SequenceMaxBinIdTests = [sequence_max_bin_id],
     [
         {normal_id, [sequence], NormalIdTests},
         {sequence_int_id, [sequence], SequenceIntIdTests},
-        {sequence_bin_id, [sequence], SequenceBinIdTests}
+        {sequence_max_int_id, [sequence], SequenceMaxIntIdTests},
+        {sequence_bin_id, [sequence], SequenceBinIdTests},
+        {sequence_max_bin_id, [sequence], SequenceMaxBinIdTests}
     ].
 
 init_per_suite(Config) ->
@@ -43,27 +54,32 @@ init_per_group(normal_id, Config) ->
     ok = application:start(eid),
     Config;
 init_per_group(Name, Config) when Name == sequence_int_id;
-                                  Name == sequence_bin_id ->
+                                  Name == sequence_max_int_id;
+                                  Name == sequence_bin_id;
+                                  Name == sequence_max_bin_id ->
     ok = application:start(eid),
-    meck:new(eid_utils, [no_link]),
-    meck:expect(eid_utils, time_millis, fun() -> 0 end),
+    ok = meck:new(eid_utils, [no_link]),
+    ok = meck:expect(eid_utils, time_millis, fun() -> 0 end),
     Config.
 
 end_per_group(normal_id, _Config) ->
     ok = application:stop(eid),
     ok;
 end_per_group(Name, _Config) when Name == sequence_int_id;
-                                  Name == sequence_bin_id ->
-    meck:unload(eid_utils),
+                                  Name == sequence_max_int_id;
+                                  Name == sequence_bin_id;
+                                  Name == sequence_max_bin_id ->
+    true = meck:validate(eid_utils),
+    ok = meck:unload(eid_utils),
     ok = application:stop(eid),
     ok.
 
 int_id(_Config) ->
-    Id1 = eid:get_int(),
-    Id2 = eid:get_int(),
-    Id3 = eid:get_int(),
-    Id4 = eid:get_int(),
-    Id5 = eid:get_int(),
+    {ok, Id1} = eid:get_int(),
+    {ok, Id2} = eid:get_int(),
+    {ok, Id3} = eid:get_int(),
+    {ok, Id4} = eid:get_int(),
+    {ok, Id5} = eid:get_int(),
     true = Id1 < Id2,
     true = Id2 < Id3,
     true = Id3 < Id4,
@@ -71,11 +87,11 @@ int_id(_Config) ->
     ok.
 
 bin_id(_Config) ->
-    Id1 = eid:get_bin(),
-    Id2 = eid:get_bin(),
-    Id3 = eid:get_bin(),
-    Id4 = eid:get_bin(),
-    Id5 = eid:get_bin(),
+    {ok, Id1} = eid:get_bin(),
+    {ok, Id2} = eid:get_bin(),
+    {ok, Id3} = eid:get_bin(),
+    {ok, Id4} = eid:get_bin(),
+    {ok, Id5} = eid:get_bin(),
     true = Id1 /= Id2,
     true = Id2 /= Id3,
     true = Id3 /= Id4,
@@ -83,11 +99,11 @@ bin_id(_Config) ->
     ok.
 
 sequence_int_id(_Config) ->
-    Id1 = eid:get_int(),
-    Id2 = eid:get_int(),
-    Id3 = eid:get_int(),
-    Id4 = eid:get_int(),
-    Id5 = eid:get_int(),
+    {ok, Id1} = eid:get_int(),
+    {ok, Id2} = eid:get_int(),
+    {ok, Id3} = eid:get_int(),
+    {ok, Id4} = eid:get_int(),
+    {ok, Id5} = eid:get_int(),
     Id1 = 0,
     Id2 = Id1 + 1,
     Id3 = Id2 + 1,
@@ -95,12 +111,21 @@ sequence_int_id(_Config) ->
     Id5 = Id4 + 1,
     ok.
 
+sequence_max_int_id(_Config) ->
+    lists:foreach(fun(X) ->
+                {ok, Id} = eid:get_int(),
+                true = X == Id end, lists:seq(0, ?MAX_SEQ)),
+    {error, sequence_number_exceeded} = eid:get_int(),
+    {error, sequence_number_exceeded} = eid:get_int(),
+    {error, sequence_number_exceeded} = eid:get_int(),
+    ok.
+
 sequence_bin_id(_Config) ->
-    << Time1:48/integer, Seq1:16/integer >> = eid:get_bin(),
-    << Time2:48/integer, Seq2:16/integer >> = eid:get_bin(),
-    << Time3:48/integer, Seq3:16/integer >> = eid:get_bin(),
-    << Time4:48/integer, Seq4:16/integer >> = eid:get_bin(),
-    << Time5:48/integer, Seq5:16/integer >> = eid:get_bin(),
+    {ok, << Time1:48/integer, Seq1:16/integer >>} = eid:get_bin(),
+    {ok, << Time2:48/integer, Seq2:16/integer >>} = eid:get_bin(),
+    {ok, << Time3:48/integer, Seq3:16/integer >>} = eid:get_bin(),
+    {ok, << Time4:48/integer, Seq4:16/integer >>} = eid:get_bin(),
+    {ok, << Time5:48/integer, Seq5:16/integer >>} = eid:get_bin(),
     true = Time1 == Time2,
     true = Time2 == Time3,
     true = Time3 == Time4,
@@ -110,4 +135,13 @@ sequence_bin_id(_Config) ->
     Seq3 = 2,
     Seq4 = 3,
     Seq5 = 4,
+    ok.
+
+sequence_max_bin_id(_Config) ->
+    lists:foreach(fun(X) ->
+                {ok, << _:48/integer, Seq:16/integer >>} = eid:get_bin(),
+                true = X == Seq end, lists:seq(0, ?MAX_SEQ)),
+    {error, sequence_number_exceeded} = eid:get_bin(),
+    {error, sequence_number_exceeded} = eid:get_bin(),
+    {error, sequence_number_exceeded} = eid:get_bin(),
     ok.

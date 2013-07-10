@@ -19,38 +19,50 @@
 -record(state, {last_id :: bin_id()}).
 
 -define(SERVER, ?MODULE).
+-define(MAX_SEQ, 65535).
 
 %% API
 
 %% @doc Starts the gen_server. It stores the last time stamp in its state.
--spec start_link() -> {'ok', pid()} | 'ignore' | {'error', term()}.
+-spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 %% @doc Stops the gen_server.
--spec stop() -> 'stopped'.
+-spec stop() -> stopped.
 stop() ->
     gen_server:call(?SERVER, stop).
 
 %% @doc Returns either binary or integer unique id.
--spec get('int' | 'bin') -> int_id() | bin_id().
+-spec get(int | bin) -> {ok, int_id()} | {ok, bin_id()} | {error, term()}.
 get(Type) ->
     gen_server:call(?SERVER, {get, Type}).
 
 %% Callbacks
 
 init([]) ->
-    {ok, #state{last_id = id(eid_utils:time_millis(), 0)}}.
+    {ok, Id} = id(eid_utils:time_millis(), 0),
+    {ok, #state{last_id=Id}}.
 
 handle_call({get, int}, _From,
-            #state{last_id = << Time:48/integer, Seq:16/integer >>}) ->
-    Id = id(Time, Seq),
-    << IdInt:64/integer >> = Id,
-    {reply, IdInt, #state{last_id = Id}};
+            #state{last_id = << Time:48/integer, Seq:16/integer >> = LastId}) ->
+    {Reply, Id} = case id(Time, Seq) of
+        {ok, Id2} ->
+            << IdInt:64/integer >> = Id2,
+            {{ok, IdInt}, Id2};
+        {error, Reason} ->
+            {{error, Reason}, LastId}
+    end,
+    {reply, Reply, #state{last_id=Id}};
 handle_call({get, bin}, _From,
-            #state{last_id = << Time:48/integer, Seq:16/integer >>}) ->
-    Id = id(Time, Seq),
-    {reply, Id, #state{last_id = Id}};
+            #state{last_id = << Time:48/integer, Seq:16/integer >> = LastId}) ->
+    {Reply, Id} = case id(Time, Seq) of
+        {ok, Id2} ->
+            {{ok, Id2}, Id2};
+        {error, Reason} ->
+            {{error, Reason}, LastId}
+    end,
+    {reply, Reply, #state{last_id=Id}};
 handle_call(stop, _From, State) ->
     {stop, normal, stopped, State};
 handle_call(_Request, _From, State) ->
@@ -70,6 +82,8 @@ code_change(_OldVsn, State, _Extra) ->
 
 %% Internal functions
 
+id(_Time, ?MAX_SEQ) ->
+    {error, sequence_number_exceeded};
 id(Time, Seq) ->
     Time2 = eid_utils:time_millis(),
     % if the current timestamp is the same as the previous one, the sequence
@@ -80,4 +94,4 @@ id(Time, Seq) ->
         true ->
             Seq + 1
     end,
-    << Time2:48/integer, Seq2:16/integer >>.
+    {ok, << Time2:48/integer, Seq2:16/integer >>}.

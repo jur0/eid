@@ -3,8 +3,8 @@
 
 %% API
 -export([start_link/0]).
--export([stop/0]).
 -export([get/1]).
+-export([stop/0]).
 
 %% Callbacks
 -export([init/1]).
@@ -19,7 +19,8 @@
 -record(state, {last_id :: bin_id()}).
 
 -define(SERVER, ?MODULE).
--define(MAX_SEQ, 65535).
+-define(MAX_ID, 16#ffffffffffffffff).
+-define(MAX_SEQ, 16#ffff).
 
 %% API
 
@@ -34,7 +35,8 @@ stop() ->
     gen_server:call(?SERVER, stop).
 
 %% @doc Returns either binary or integer unique id.
--spec get(int | bin) -> {ok, int_id()} | {ok, bin_id()} | {error, term()}.
+-spec get({int, ascend} | {int, descend} | {bin, ascend} | {bin, descend}) ->
+        {ok, int_id()} | {ok, bin_id()} | {error, term()}.
 get(Type) ->
     gen_server:call(?SERVER, {get, Type}).
 
@@ -44,21 +46,44 @@ init([]) ->
     {ok, Id} = id(eid_utils:time_millis(), 0),
     {ok, #state{last_id=Id}}.
 
-handle_call({get, int}, _From,
+handle_call({get, {int, ascend}}, _From,
             #state{last_id = << Time:48/integer, Seq:16/integer >> = LastId}) ->
     {Reply, Id} = case id(Time, Seq) of
         {ok, Id2} ->
-            << IdInt:64/integer >> = Id2,
-            {{ok, IdInt}, Id2};
+            << Id3:64/integer >> = Id2,
+            {{ok, Id3}, Id2};
         {error, Reason} ->
             {{error, Reason}, LastId}
     end,
     {reply, Reply, #state{last_id=Id}};
-handle_call({get, bin}, _From,
+handle_call({get, {int, descend}}, _From,
+            #state{last_id = << Time:48/integer, Seq:16/integer >> = LastId}) ->
+    {Reply, Id} = case id(Time, Seq) of
+        {ok, Id2} ->
+            << Id3:64/integer >> = Id2,
+            % bnot has higher priority than band
+            Id4 = bnot Id3 band ?MAX_ID,
+            {{ok, Id4}, Id2};
+        {error, Reason} ->
+            {{error, Reason}, LastId}
+    end,
+    {reply, Reply, #state{last_id=Id}};
+handle_call({get, {bin, ascend}}, _From,
             #state{last_id = << Time:48/integer, Seq:16/integer >> = LastId}) ->
     {Reply, Id} = case id(Time, Seq) of
         {ok, Id2} ->
             {{ok, Id2}, Id2};
+        {error, Reason} ->
+            {{error, Reason}, LastId}
+    end,
+    {reply, Reply, #state{last_id=Id}};
+handle_call({get, {bin, descend}}, _From,
+            #state{last_id = << Time:48/integer, Seq:16/integer >> = LastId}) ->
+    {Reply, Id} = case id(Time, Seq) of
+        {ok, Id2} ->
+            << Id3:64/integer >> = Id2,
+            Id4 = bnot Id3 band ?MAX_ID,
+            {{ok, << Id4:64/integer >>}, Id2};
         {error, Reason} ->
             {{error, Reason}, LastId}
     end,

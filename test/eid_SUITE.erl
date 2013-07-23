@@ -45,7 +45,7 @@ groups() ->
     SequenceMaxBinIdTests = [sequence_max_bin_id],
     SequenceMinBinIdTests = [sequence_min_bin_id],
     [
-        {normal_id, [sequence], NormalIdTests},
+        {normal_id, [parallel], NormalIdTests},
         {sequence_int_id, [sequence], SequenceIntIdTests},
         {sequence_max_int_id, [sequence], SequenceMaxIntIdTests},
         {sequence_min_int_id, [sequence], SequenceMinIntIdTests},

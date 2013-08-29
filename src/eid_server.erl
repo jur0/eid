@@ -4,6 +4,7 @@
 %% API
 -export([start_link/0]).
 -export([get/1]).
+-export([max_seq/0]).
 -export([stop/0]).
 
 %% Callbacks
@@ -37,6 +38,11 @@ stop() ->
         {ok, eid:int_id()} | {ok, eid:bin_id()} | {error, term()}.
 get(Type) ->
     gen_server:call(?SERVER, {get, Type}).
+
+%% @doc Return the maximal sequence number.
+-spec max_seq() -> pos_integer().
+max_seq() ->
+    ?MAX_SEQ.
 
 %% Callbacks
 

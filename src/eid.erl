@@ -5,6 +5,7 @@
 -export([get_bin/1]).
 -export([get_int/0]).
 -export([get_int/1]).
+-export([max_seq/0]).
 
 -type int_id() :: pos_integer().
 -export_type([int_id/0]).
@@ -44,3 +45,8 @@ get_int(ascend) ->
     eid_server:get({int, ascend});
 get_int(descend) ->
     eid_server:get({int, descend}).
+
+%% @doc Returns the maximal sequence number in integer format.
+-spec max_seq() -> pos_integer().
+max_seq() ->
+    eid_server:max_seq().

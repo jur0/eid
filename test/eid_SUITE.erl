@@ -22,9 +22,6 @@
 -export([sequence_max_bin_id/1]).
 -export([sequence_min_bin_id/1]).
 
-%% NOTE: this must be the same as in eid_server!
--define(MAX_SEQ, 16#ffff).
-
 all() ->
     [
         {group, normal_id},
@@ -118,7 +115,7 @@ sequence_int_id(_Config) ->
     ok.
 
 sequence_max_int_id(_Config) ->
-    Ids = get_ids(int, ascend, ?MAX_SEQ),
+    Ids = get_ids(int, ascend, eid:max_seq()),
     ok = check_ids(ascend, Ids),
     {error, sequence_number_exceeded} = eid:get_int(),
     {error, sequence_number_exceeded} = eid:get_int(),
@@ -126,7 +123,7 @@ sequence_max_int_id(_Config) ->
     ok.
 
 sequence_min_int_id(_Config) ->
-    Ids = get_ids(int, descend, ?MAX_SEQ),
+    Ids = get_ids(int, descend, eid:max_seq()),
     ok = check_ids(descend, Ids),
     {error, sequence_number_exceeded} = eid:get_int(),
     {error, sequence_number_exceeded} = eid:get_int(),
@@ -139,7 +136,7 @@ sequence_bin_id(_Config) ->
     ok.
 
 sequence_max_bin_id(_Config) ->
-    Ids = get_ids(bin, ascend, ?MAX_SEQ),
+    Ids = get_ids(bin, ascend, eid:max_seq()),
     ok = check_ids(ascend, Ids),
     {error, sequence_number_exceeded} = eid:get_bin(),
     {error, sequence_number_exceeded} = eid:get_bin(),
@@ -147,7 +144,7 @@ sequence_max_bin_id(_Config) ->
     ok.
 
 sequence_min_bin_id(_Config) ->
-    Ids = get_ids(bin, descend, ?MAX_SEQ),
+    Ids = get_ids(bin, descend, eid:max_seq()),
     ok = check_ids(descend, Ids),
     {error, sequence_number_exceeded} = eid:get_bin(),
     {error, sequence_number_exceeded} = eid:get_bin(),

@@ -6,7 +6,11 @@
 -export([get_int/0]).
 -export([get_int/1]).
 
--include("eid.hrl").
+-type int_id() :: pos_integer().
+-export_type([int_id/0]).
+
+-type bin_id() :: << _:64 >>.
+-export_type([bin_id/0]).
 
 %% @doc Returns an unique id as a 64-bit binary. The upper 48 bits are a time
 %% stamp (UNIX time stamp in milliseconds) and the lower 16 bits are a sequence

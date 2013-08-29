@@ -14,9 +14,7 @@
 -export([terminate/2]).
 -export([code_change/3]).
 
--include("eid.hrl").
-
--record(state, {last_id :: bin_id()}).
+-record(state, {last_id :: eid:bin_id()}).
 
 -define(SERVER, ?MODULE).
 -define(MAX_ID, 16#ffffffffffffffff).
@@ -36,7 +34,7 @@ stop() ->
 
 %% @doc Returns either binary or integer unique id.
 -spec get({int, ascend} | {int, descend} | {bin, ascend} | {bin, descend}) ->
-        {ok, int_id()} | {ok, bin_id()} | {error, term()}.
+        {ok, eid:int_id()} | {ok, eid:bin_id()} | {error, term()}.
 get(Type) ->
     gen_server:call(?SERVER, {get, Type}).
 

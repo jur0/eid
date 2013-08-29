@@ -18,6 +18,7 @@ start_link() ->
 
 %% Callbacks
 
+%% @private
 init([]) ->
     Procs = [{eid_server, {eid_server, start_link, []},
               permanent, 5000, worker, [eid_server]}],

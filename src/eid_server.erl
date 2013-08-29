@@ -42,10 +42,12 @@ get(Type) ->
 
 %% Callbacks
 
+%% @private
 init([]) ->
     {ok, Id} = id(eid_utils:time_millis(), 0),
     {ok, #state{last_id=Id}}.
 
+%% @private
 handle_call({get, {int, ascend}}, _From,
             #state{last_id = << Time:48/integer, Seq:16/integer >> = LastId}) ->
     {Reply, Id} = case id(Time, Seq) of
@@ -93,20 +95,25 @@ handle_call(stop, _From, State) ->
 handle_call(_Request, _From, State) ->
     {reply, ignored, State}.
 
+%% @private
 handle_cast(_Request, State) ->
     {noreply, State}.
 
+%% @private
 handle_info(_Info, State) ->
     {noreply, State}.
 
+%% @private
 terminate(_Reason, _State) ->
     ok.
 
+%% @private
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% Internal functions
 
+%% @private
 id(_Time, ?MAX_SEQ) ->
     {error, sequence_number_exceeded};
 id(Time, Seq) ->

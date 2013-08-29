@@ -7,8 +7,10 @@
 
 %% Callbacks
 
+%% @private
 start(_Type, _Args) ->
     eid_sup:start_link().
 
+%% @private
 stop(_State) ->
     ok.

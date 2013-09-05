@@ -1,3 +1,4 @@
+%% @doc Application callback module.
 -module(eid_app).
 -behaviour(application).
 

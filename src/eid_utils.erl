@@ -1,3 +1,4 @@
+%% @doc API for functions used in <code>eid_server</code> module.
 -module(eid_utils).
 
 %% API

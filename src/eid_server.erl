@@ -1,3 +1,4 @@
+%% @doc API for a server where ids are generated.
 -module(eid_server).
 -behaviour(gen_server).
 

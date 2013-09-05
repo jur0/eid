@@ -1,3 +1,4 @@
+%% @doc API for starting the main supervisor.
 -module(eid_sup).
 -behaviour(supervisor).
 

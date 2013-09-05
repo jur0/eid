@@ -1,3 +1,4 @@
+%% @doc API for retrieving ids.
 -module(eid).
 
 %% API

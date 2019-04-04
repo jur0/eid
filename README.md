@@ -40,3 +40,8 @@ returned when the sequence number is exceeded (which could teoretically happen
 when there are more then 2^16 ids generated within 1 microsecond).
 
 The ids are unique just on one node!
+
+Add to your dependencies:
+
+    {deps, [{eid, "https://github.com/jur0/eid.git", {branch, "master"}}]}.
+

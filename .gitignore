@@ -6,5 +6,7 @@ ebin/*.beam
 ebin/test
 ct_logs
 test/*.beam
+test/ct.cover.spec
+cover
 _build
 

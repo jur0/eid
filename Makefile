@@ -1,7 +1,6 @@
 PROJECT = eid
 PROJECT_DESCRIPTION = Unique ID generator
 PROJECT_VERSION = 0.5.0
-PROJECT_REGISTERED = eid_sup
 
 # Test dependencies.
 TEST_DEPS = meck

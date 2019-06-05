@@ -1,15 +1,16 @@
-# general options
 PROJECT = eid
-V = 1
+PROJECT_DESCRIPTION = Unique ID generator
+PROJECT_VERSION = 0.5.0
+PROJECT_REGISTERED = eid_sup
 
-# test dependencies
+# Test dependencies.
 TEST_DEPS = meck
-dep_meck = https://github.com/eproxus/meck.git 0.7.2
+dep_meck = git https://github.com/eproxus/meck 0.8.13
 
-# test options
-CT_SUITES = eid
-
-# dialyzer
-PLT_APPS = crypto
+CT_LOGS_DIR = ct_logs
 
 include erlang.mk
+
+# Generate rebar.config on build.
+app:: rebar.config
+

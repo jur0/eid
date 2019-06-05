@@ -26,9 +26,6 @@
 -export([init/1]).
 -export([handle_call/3]).
 -export([handle_cast/2]).
--export([handle_info/2]).
--export([terminate/2]).
--export([code_change/3]).
 
 -record(state, {last_id :: eid:bin_id()}).
 
@@ -44,9 +41,9 @@ start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 %% @doc Stops the gen_server.
--spec stop() -> stopped.
+-spec stop() -> ok.
 stop() ->
-    gen_server:call(?SERVER, stop).
+    gen_server:stop(?SERVER).
 
 %% @doc Returns either binary or integer unique id.
 -spec get({int, ascend} | {int, descend} | {bin, ascend} | {bin, descend}) ->
@@ -109,26 +106,12 @@ handle_call({get, {bin, descend}}, _From,
             {{error, Reason}, LastId}
     end,
     {reply, Reply, #state{last_id=Id}};
-handle_call(stop, _From, State) ->
-    {stop, normal, stopped, State};
 handle_call(_Request, _From, State) ->
     {reply, ignored, State}.
 
 %% @private
 handle_cast(_Request, State) ->
     {noreply, State}.
-
-%% @private
-handle_info(_Info, State) ->
-    {noreply, State}.
-
-%% @private
-terminate(_Reason, _State) ->
-    ok.
-
-%% @private
-code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
 
 %% Internal functions
 

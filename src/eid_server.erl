@@ -36,7 +36,7 @@
 %% API
 
 %% @doc Starts the gen_server. It stores the last time stamp in its state.
--spec start_link() -> {ok, pid()} | ignore | {error, term()}.
+-spec start_link() -> {ok, pid()}.
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 

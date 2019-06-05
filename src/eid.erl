@@ -55,7 +55,7 @@ get_int() ->
 %% {@link get_int/0. <code>get_int()</code>}. Although, when called with
 %% 'descend' as parameter, it returns an id with inverted bits. The inversion
 %% makes the ids descend.
--spec get_int(ascend | descend) -> {int, int_id()} | {error, term()}.
+-spec get_int(ascend | descend) -> {ok, int_id()} | {error, term()}.
 get_int(ascend) ->
     eid_server:get({int, ascend});
 get_int(descend) ->
@@ -65,3 +65,4 @@ get_int(descend) ->
 -spec max_seq() -> pos_integer().
 max_seq() ->
     eid_server:max_seq().
+

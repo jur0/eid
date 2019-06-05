@@ -185,3 +185,4 @@ check_ids(descend, [Id1, Id2 | Ids]) when Id1 > Id2 ->
 check_ids(Type, Ids) ->
     ct:pal("Error, type: ~p, ids: ~p~n", [Type, Ids]),
     error.
+

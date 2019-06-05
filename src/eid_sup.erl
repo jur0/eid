@@ -27,7 +27,7 @@
 %% API
 
 %% @doc Starts the main application supervisor.
--spec start_link() -> {ok, pid()} | ignore | {error, term()}.
+-spec start_link() -> {ok, pid()}.
 start_link() ->
     supervisor:start_link({local, ?SUPERVISOR}, ?MODULE, []).
 
@@ -38,3 +38,4 @@ init([]) ->
     Procs = [{eid_server, {eid_server, start_link, []},
               permanent, 5000, worker, [eid_server]}],
     {ok, {{one_for_one, 10, 10}, Procs}}.
+

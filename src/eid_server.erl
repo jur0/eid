@@ -60,13 +60,13 @@ max_seq() ->
 
 %% @private
 init([]) ->
-    {ok, Id} = id(eid_utils:time_millis(), 0),
+    {ok, Id} = id(0, eid_utils:time_millis(), 0),
     {ok, #state{last_id=Id}}.
 
 %% @private
 handle_call({get, {int, ascend}}, _From,
             #state{last_id = << Time:48/integer, Seq:16/integer >> = LastId}) ->
-    {Reply, Id} = case id(Time, Seq) of
+    {Reply, Id} = case id(Time, eid_utils:time_millis(), Seq) of
         {ok, Id2} ->
             << Id3:64/integer >> = Id2,
             {{ok, Id3}, Id2};
@@ -76,7 +76,7 @@ handle_call({get, {int, ascend}}, _From,
     {reply, Reply, #state{last_id=Id}};
 handle_call({get, {int, descend}}, _From,
             #state{last_id = << Time:48/integer, Seq:16/integer >> = LastId}) ->
-    {Reply, Id} = case id(Time, Seq) of
+    {Reply, Id} = case id(Time, eid_utils:time_millis(), Seq) of
         {ok, Id2} ->
             << Id3:64/integer >> = Id2,
             % bnot has higher priority than band
@@ -88,7 +88,7 @@ handle_call({get, {int, descend}}, _From,
     {reply, Reply, #state{last_id=Id}};
 handle_call({get, {bin, ascend}}, _From,
             #state{last_id = << Time:48/integer, Seq:16/integer >> = LastId}) ->
-    {Reply, Id} = case id(Time, Seq) of
+    {Reply, Id} = case id(Time, eid_utils:time_millis(), Seq) of
         {ok, Id2} ->
             {{ok, Id2}, Id2};
         {error, Reason} ->
@@ -97,7 +97,7 @@ handle_call({get, {bin, ascend}}, _From,
     {reply, Reply, #state{last_id=Id}};
 handle_call({get, {bin, descend}}, _From,
             #state{last_id = << Time:48/integer, Seq:16/integer >> = LastId}) ->
-    {Reply, Id} = case id(Time, Seq) of
+    {Reply, Id} = case id(Time, eid_utils:time_millis(), Seq) of
         {ok, Id2} ->
             << Id3:64/integer >> = Id2,
             Id4 = bnot Id3 band ?MAX_ID,
@@ -116,16 +116,11 @@ handle_cast(_Request, State) ->
 %% Internal functions
 
 %% @private
-id(_Time, ?MAX_SEQ) ->
-    {error, sequence_number_exceeded};
-id(Time, Seq) ->
-    Time2 = eid_utils:time_millis(),
-    % if the current timestamp is the same as the previous one, the sequence
-    % number is increased by 1
-    Seq2 = case Time == Time2 of
-        false ->
-            0;
-        true ->
-            Seq + 1
-    end,
-    {ok, << Time2:48/integer, Seq2:16/integer >>}.
+id(Time, Time2, _Seq) when Time =/= Time2 ->
+    {ok, << Time2:48/integer, 0:16/integer >>};
+id(Time, Time, Seq) when Seq < ?MAX_SEQ ->
+    % The old and the new timestamp are the same, only increase Seq.
+    {ok, << Time:48/integer, (Seq + 1):16/integer >>};
+id(_Time, _Time, ?MAX_SEQ) ->
+    {error, sequence_number_exceeded}.
+

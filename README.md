@@ -1,47 +1,53 @@
-eid
-===
+# eid
 
-Erlang unique id generator.
+Erlang unique ID generator.
 
-Id types
---------
+## ID types
 
-The id is composed of the UNIX time stamp in milliseconds (upper 48 bits) and a
-sequence number (lower 16 bits). The sequence number is used in case there are
-more than one equal time stamps. This happens when ids are generated quickly, so
-they have the same time stamp. The sequence number is there to make these ids
-unique.
+An ID is composed of the UNIX timestamp in milliseconds (upper 48 bits) and a
+sequence number (lower 16 bits). The sequence number is used when two UNIX
+timestamp are equal. This happens when the IDs are generated quickly (more
+than one ID per millisecond). The sequence number makes sure that even in this
+case the IDs are unique.
 
-There are two formats of the ids that can be generated:
+There are two formats of the IDs that can be generated:
 
  * binary - upper 48 bits is UNIX timestamp in milliseconds and the lower 16
 bits is the sequence number
  * integer - the same as binary, but expressed as a positive integer
 
-Moreover, the generated ids are either ascending or descending. This feature
-makes it possible to sort the ids according to when they were generated.
+Moreover, the generated IDs are either ascending or descending. This feature
+makes it possible to sort the IDs according to when they were generated.
 
-Usage
------
+## Usage
 
-In order to generate ids, the eid application must be started. The API contains
-the following functions:
+In order to generate IDs, the `eid` application must be started. The API
+contains the following functions:
 
- * `eid:get_bin()` - returns a binary id, the generated ids are ascending
- * `eid:get_bin(ascend)` - the same as the previous function
- * `eid:get_bin(descend)` - returns a binary id, the generated ids are descending
- * `eid:get_int()` - returns an integer id, the generated ids are ascending
- * `eid:get_int(ascend)` - the same as the previous function
+ * `eid:get_bin()` - returns a binary ID, the generated IDs are ascending;
+ * `eid:get_bin(ascend)` - the same as the previous function;
+ * `eid:get_bin(descend)` - returns a binary ID, the generated IDs are
+descending;
+ * `eid:get_int()` - returns an integer ID, the generated IDs are ascending;
+ * `eid:get_int(ascend)` - the same as the previous function;
  * `eid:get_int(descend)` - returns an integer id, the generated ids are
-descending
+descending.
 
-The funtions return either `{ok, Id}` or `{error, Reason}`. The error is
-returned when the sequence number is exceeded (which could teoretically happen
-when there are more then 2^16 ids generated within 1 microsecond).
+The functions return either `{ok, Id}` or `{error, Reason}`. The error is
+returned when the sequence number is exceeded (which could theoretically
+happen when there are more then 2^16 IDs generated within 1 millisecond).
 
-The ids are unique just on one node!
+*The IDs are unique just on one node!*
 
-Add to your dependencies:
+### Rebar dependency
 
-    {deps, [{eid, "https://github.com/jur0/eid.git", {branch, "master"}}]}.
+The `deps` part of the `rebar.config` should include:
+
+```erlang
+  {deps, [
+    ...
+    {eid, {git, "https://github.com/jur0/eid.git", {branch, "master"}}},
+    ...
+  ]}.
+```
 

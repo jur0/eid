@@ -37,5 +37,5 @@ start_link() ->
 init([]) ->
     Procs = [{eid_server, {eid_server, start_link, []},
               permanent, 5000, worker, [eid_server]}],
-    {ok, {{one_for_one, 10, 10}, Procs}}.
+    {ok, {{one_for_one, 1, 5}, Procs}}.
 
